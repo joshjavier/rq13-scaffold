@@ -1,46 +1,46 @@
+import { useEffect, useState } from "react";
+import initialState from "./fixture";
+import Task from "./Task";
+import TaskAdd from "./TaskAdd";
+
+function getInitialState() {
+  return (
+    JSON.parse(localStorage.getItem("task-manager-items-list")) || initialState
+  );
+}
+
 function TaskList() {
+  const [tasks, setTasks] = useState(getInitialState);
+
+  useEffect(() => {
+    localStorage.setItem("task-manager-items-list", JSON.stringify(tasks));
+  }, [tasks]);
+
+  const addTask = (title) => {
+    setTasks((ts) => ts.concat({ id: Math.random() * 1000000, title }));
+  };
+
+  const editTask = (id, title) => {
+    setTasks((ts) =>
+      ts.map((task) => (task.id === id ? { ...task, title } : task))
+    );
+  };
+
+  const deleteTask = (id) => {
+    setTasks((ts) => ts.filter((task) => task.id !== id));
+  };
+
   return (
     <ol className="lane">
-      <li className="card">
-        <header className="card-header">
-          <p className="card-title">This is a task</p>
-        </header>
-        <ul className="card-controls">
-          <li>
-            <button className="card-control">Edit</button>
-          </li>
-          <li>
-            <button className="card-control">Delete</button>
-          </li>
-        </ul>
-      </li>
-      <li className="card">
-        <header className="card-header">
-          <p className="card-title">This is another task</p>
-        </header>
-        <ul className="card-controls">
-          <li>
-            <button className="card-control">Edit</button>
-          </li>
-          <li>
-            <button className="card-control">Delete</button>
-          </li>
-        </ul>
-      </li>
-      <li className="card">
-        <header className="card-header card-header-new">
-          <form className="card-title-form">
-            <input
-              className="card-title card-title-input"
-              placeholder="Add new task"
-              name="title"
-            />
-            <button className="icon-button">
-              <img src="icons/plus.svg" alt="Add task" />
-            </button>
-          </form>
-        </header>
-      </li>
+      {tasks.map((task) => (
+        <Task
+          key={task.id}
+          task={task}
+          editTask={editTask}
+          deleteTask={deleteTask}
+        />
+      ))}
+      <TaskAdd addTask={addTask} />
     </ol>
   );
 }
